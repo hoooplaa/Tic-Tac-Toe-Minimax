@@ -1,0 +1,76 @@
+let board = [
+  ['X','X','X'],
+  ['X','X','O'],
+  ['X','O','X'],
+];
+let boardSize = 3;
+let offset = 300;
+let size = 100;
+
+let pos = ['', ''];
+
+let player1 = 'X';
+let player2 = 'O';
+let turn = true //player1
+
+function setup() {
+  createCanvas(1000, 1000);
+}
+
+function draw() {
+  background(220);
+  
+  for (let i = 0; i < boardSize; i++) {
+    for (let j = 0; j < boardSize; j++) {
+    
+      x = i * size + offset;
+      y = j * size + offset;
+
+      textSize(size/2);
+      textAlign(LEFT, TOP);
+      text(board[i][j], x, y);
+      
+      if (i > 0) {
+        line(x, y, x, y + size);
+      }
+      if (j > 0) {
+        line(x, y, x + size, y);
+      }
+    }
+  }
+  
+  textSize(30);
+  pos = getPos();
+  text(pos[0], 100, 100);
+  text(pos[1], 200, 100);
+}
+
+function mouseClicked() {
+  getPos()
+}
+
+function play(x, y) {
+  if (turn) {
+    board[x][y] = 'X';
+    turn = false;
+  } else {
+    board[x][y] = 'O';
+    turn = true;
+  }
+}
+
+function getPos() {
+  return [ceil(mouseX/size) - offset/100, ceil(mouseY/size) - offset/100];
+}
+
+
+
+
+
+
+
+
+
+
+
+
