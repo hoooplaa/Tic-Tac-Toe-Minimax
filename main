@@ -1,67 +1,91 @@
 let board = [
-  ['X','X','X'],
-  ['X','X','O'],
-  ['X','O','X'],
+  ['','','',''],
+  ['','','',''],
+  ['','','',''],
+  ['','','',''],
 ];
-let boardSize = 3;
-let offset = 300;
-let size = 100;
 
-let pos = ['', ''];
+let gridSize;
+let numberOfSpots;
+let offset;
 
-let player1 = 'X';
-let player2 = 'O';
-let turn = true //player1
+let mousePos = [0, 0];
+let available = [];
+let turn = true; //X
 
 function setup() {
-  createCanvas(1000, 1000);
+  createCanvas(800, 800);
+  
+  numberOfSpots = 3;
+  gridSize = width/numberOfSpots;
+  offset = gridSize/4;
+  
+  player1 = new Player('X');
+  player2 = new Player('O');
 }
 
 function draw() {
   background(220);
+  strokeWeight(2);
   
-  for (let i = 0; i < boardSize; i++) {
-    for (let j = 0; j < boardSize; j++) {
-    
-      x = i * size + offset;
-      y = j * size + offset;
+  available = [];
+  
 
-      textSize(size/2);
-      textAlign(LEFT, TOP);
-      text(board[i][j], x, y);
+  for (i = 0; i < numberOfSpots; i++) {
+    for (j = 0; j < numberOfSpots; j++) {
+      //draw grid and characters from board
+      line(i * gridSize, j, i * gridSize, j + gridSize*numberOfSpots);
+      line(i, j * gridSize, i + gridSize*numberOfSpots, j * gridSize);
       
-      if (i > 0) {
-        line(x, y, x, y + size);
+      //check available spots
+      if (board[i][j] == '') {
+        available.push([i, j]);
       }
-      if (j > 0) {
-        line(x, y, x + size, y);
-      }
+      
+      //draw X's and O's
+      textSize(gridSize/1.5);
+      text(board[i][j], i*gridSize + offset, j*gridSize + gridSize - offset);
     }
   }
   
+  //get position of mouse on grid
+  mousePos = [floor(mouseX/gridSize), floor(mouseY/gridSize)];
+  
   textSize(30);
-  pos = getPos();
-  text(pos[0], 100, 100);
-  text(pos[1], 200, 100);
+  text(mousePos[0], width - 200, height - 50);
+  text(mousePos[1], width - 75, height - 50);
 }
 
 function mouseClicked() {
-  getPos()
-}
-
-function play(x, y) {
   if (turn) {
-    board[x][y] = 'X';
+    player1.play(mousePos[0], mousePos[1]);
     turn = false;
   } else {
-    board[x][y] = 'O';
+    player2.play(mousePos[0], mousePos[1]);
     turn = true;
   }
 }
 
-function getPos() {
-  return [ceil(mouseX/size) - offset/100, ceil(mouseY/size) - offset/100];
+class Player {
+  constructor(cha) {
+    this.character = cha;
+  }
+  
+  play(posX, posY) {
+    print(available[1]);
+    print(posX, posY);
+    
+    if (!([posX, posY] in available)) {
+      board[posX][posY] = this.character;
+    } else {
+      print('you cant play here');
+    }
+  }
 }
+
+
+
+
 
 
 
