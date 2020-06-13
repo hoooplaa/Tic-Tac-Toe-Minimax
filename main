@@ -10,8 +10,12 @@ let numberOfSpots;
 let offset;
 
 let mousePos = [0, 0];
-let available = [];
+
+let bestSpot = [];
+
 let turn = true; //X
+let gameOver = false;
+let winner = '';
 
 function setup() {
   createCanvas(800, 800);
@@ -27,20 +31,12 @@ function setup() {
 function draw() {
   background(220);
   strokeWeight(2);
-  
-  available = [];
-  
 
   for (i = 0; i < numberOfSpots; i++) {
     for (j = 0; j < numberOfSpots; j++) {
       //draw grid and characters from board
       line(i * gridSize, j, i * gridSize, j + gridSize*numberOfSpots);
       line(i, j * gridSize, i + gridSize*numberOfSpots, j * gridSize);
-      
-      //check available spots
-      if (board[i][j] == '') {
-        available.push([i, j]);
-      }
       
       //draw X's and O's
       textSize(gridSize/1.5);
@@ -49,7 +45,14 @@ function draw() {
   }
   
   //get position of mouse on grid
+  //get available working, use it in check win for tie
   mousePos = [floor(mouseX/gridSize), floor(mouseY/gridSize)];
+  
+  if (gameOver) {
+    textSize(30);
+    text('winner: ' + winner, 25, 30);
+  }
+  
   
   textSize(30);
   text(mousePos[0], width - 200, height - 50);
@@ -57,13 +60,59 @@ function draw() {
 }
 
 function mouseClicked() {
-  if (turn) {
-    player1.play(mousePos[0], mousePos[1]);
-    turn = false;
-  } else {
-    player2.play(mousePos[0], mousePos[1]);
-    turn = true;
+  if (board[mousePos[0]][mousePos[1]] == '' && !gameOver) {
+    if (turn) {
+      player1.play(mousePos[0], mousePos[1]);
+      turn = false;
+      checkWin(player1.character);
+    } else {
+      bestMove(); 
+      player2.play(mousePos[0], mousePos[1]);
+      turn = true;
+      checkWin(player2.character);
+    }
   }
+}
+
+function checkWin(cha) {
+    //check rows and columns
+    for (i = 0; i < numberOfSpots; i++) {
+        if (board[i][0] == cha && board[i][1] == cha && board[i][2] == cha) {
+            gameOver = true;
+        } else if (board[0][i] == cha && board[1][i] == cha && board[2][i] == cha) {
+            gameOver = true;
+        }
+    }
+    
+    //check diagnols
+    if (board[0][0] == cha && board[1][1] == cha && board[2][2] == cha) {
+        gameOver = true;
+    } else if (board[2][0] == cha && board[1][1] == cha && board[0][2] == cha) {
+        gameOver = true;
+    }
+    
+    if (gameOver) {
+      winner = cha;
+    }
+}
+
+function bestMove() {
+  for (i = 0; i < numberOfSpots; i++) {
+    for (j = 0; j < numberOfSpots; j++) {
+      
+      if (board[i][j] == '') {
+        print(i, j);
+      }
+    
+    }
+  }
+  
+  return;
+
+}
+
+function minimax() {
+  return 1;
 }
 
 class Player {
@@ -72,29 +121,6 @@ class Player {
   }
   
   play(posX, posY) {
-    print(available[1]);
-    print(posX, posY);
-    
-    if (!([posX, posY] in available)) {
-      board[posX][posY] = this.character;
-    } else {
-      print('you cant play here');
-    }
+    board[posX][posY] = this.character;
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
