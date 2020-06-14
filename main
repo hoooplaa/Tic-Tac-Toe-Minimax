@@ -68,11 +68,15 @@ function mouseClicked() {
     if (turn) {
       player1.play(mousePos[0], mousePos[1]);
       turn = false;
-    } else {
+      
+      //computer move
       let move = bestMove(); 
-      //player2.play(mousePos[0], mousePos[1]);
       player2.play(move[0], move[1]);
       turn = true;
+    
+    // } else {
+    //   player2.play(mousePos[0], mousePos[1]);
+    //   turn = true;
     }
     if (checkWin() != false) {
       gameOver = true;
