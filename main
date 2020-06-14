@@ -11,11 +11,15 @@ let offset;
 
 let mousePos = [0, 0];
 
-let bestSpot = [];
-
 let turn = true; //X
 let gameOver = false;
-let winner = '';
+let winner;
+
+let scores = {
+  'X' : -10,
+  'O' : 10,
+  'tie' : 0
+};
 
 function setup() {
   createCanvas(800, 800);
@@ -32,8 +36,8 @@ function draw() {
   background(220);
   strokeWeight(2);
 
-  for (i = 0; i < numberOfSpots; i++) {
-    for (j = 0; j < numberOfSpots; j++) {
+  for (let i = 0; i < numberOfSpots; i++) {
+    for (let j = 0; j < numberOfSpots; j++) {
       //draw grid and characters from board
       line(i * gridSize, j, i * gridSize, j + gridSize*numberOfSpots);
       line(i, j * gridSize, i + gridSize*numberOfSpots, j * gridSize);
@@ -64,55 +68,128 @@ function mouseClicked() {
     if (turn) {
       player1.play(mousePos[0], mousePos[1]);
       turn = false;
-      checkWin(player1.character);
     } else {
-      bestMove(); 
-      player2.play(mousePos[0], mousePos[1]);
+      let move = bestMove(); 
+      //player2.play(mousePos[0], mousePos[1]);
+      player2.play(move[0], move[1]);
       turn = true;
-      checkWin(player2.character);
+    }
+    if (checkWin() != false) {
+      gameOver = true;
+      winner = checkWin();
+      print(winner);
     }
   }
 }
 
-function checkWin(cha) {
+function checkWin() {
+  let cha;
+  
+  for (let a = 0; a < 2; a++) {
+    if (a == 0) {
+      cha = player1.character;
+    } else {
+      cha = player2.character;
+    }
+    
     //check rows and columns
-    for (i = 0; i < numberOfSpots; i++) {
-        if (board[i][0] == cha && board[i][1] == cha && board[i][2] == cha) {
-            gameOver = true;
-        } else if (board[0][i] == cha && board[1][i] == cha && board[2][i] == cha) {
-            gameOver = true;
-        }
+    for (let i = 0; i < numberOfSpots; i++) {
+      if (board[i][0] == cha && board[i][1] == cha && board[i][2] == cha) {
+        return cha.toString();
+      } else if (board[0][i] == cha && board[1][i] == cha && board[2][i] == cha) {
+        return cha.toString();
+      }
     }
     
     //check diagnols
     if (board[0][0] == cha && board[1][1] == cha && board[2][2] == cha) {
-        gameOver = true;
+      return cha.toString();
     } else if (board[2][0] == cha && board[1][1] == cha && board[0][2] == cha) {
-        gameOver = true;
+      return cha.toString();
     }
+  }
     
-    if (gameOver) {
-      winner = cha;
+  
+  //check for tie
+  let openSpots = 0;
+  for (let i = 0; i < numberOfSpots; i++) {
+    for (let j = 0; j < numberOfSpots; j++) {
+      if (board[i][j] == '') {
+        openSpots++;
+      }
     }
+  }
+  
+  if (openSpots == 0) {
+    return 'tie';
+  }
+  
+  return false;
 }
 
 function bestMove() {
-  for (i = 0; i < numberOfSpots; i++) {
-    for (j = 0; j < numberOfSpots; j++) {
+  let bestScore = -Infinity;
+  let bestSpot;
+  
+  for (let i = 0; i < numberOfSpots; i++) {
+    for (let j = 0; j < numberOfSpots; j++) {
       
       if (board[i][j] == '') {
-        print(i, j);
+        board[i][j] = player2.character;
+        let score = minimax(board, 0, false);
+        board[i][j] = '';
+        
+        if (score > bestScore) {
+          bestScore = score;
+          bestSpot = { i, j };
+        }
       }
     
     }
   }
   
-  return;
+  return [bestSpot.i, bestSpot.j]
 
 }
 
-function minimax() {
-  return 1;
+function minimax(board, depth, isMaximizing) {
+  let result = checkWin();
+  
+  //check if terminal state
+  if (result != false) {
+    return scores[result];
+  }
+  
+  if (isMaximizing) {
+    let bestScore = -Infinity;
+    
+    for (let i = 0; i < numberOfSpots; i++) {
+      for (let j = 0; j < numberOfSpots; j++) {
+        if (board[i][j] == '') {
+          board[i][j] = player2.character;
+          let score = minimax(board, depth + 1, false);
+          board[i][j] = '';
+          bestScore = max(bestScore, score);
+        }
+      }
+    }
+    return bestScore;
+    
+  } else {
+    let bestScore = Infinity;
+    
+    for (let i = 0; i < numberOfSpots; i++) {
+      for (let j = 0; j < numberOfSpots; j++) {
+        if (board[i][j] == '') {
+          board[i][j] = player1.character;
+          let score = minimax(board, depth + 1, true);
+          board[i][j] = '';
+          bestScore = min(bestScore, score);
+        }
+      }
+    }
+    return bestScore;
+  }
 }
 
 class Player {
